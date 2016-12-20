@@ -32,15 +32,16 @@ var UUFClient = {};
 
     // Check whether the JQuery is available.
     if (!window.jQuery) {
-        throw new UUFClientException("JQuery is required for UUFClient.", "JQuery not available.");
+        throw new UUFClientException("JQuery is required for UUFClient.");
     }
     // Check whether the Handlebars is available.
     if (!window.Handlebars) {
-        throw new UUFClientException("Handlebars is required for UUFClient.", "Handlebars not available.");
+        throw new UUFClientException("Handlebars JS is required for UUFClient.");
     }
 
     /**
      * Indicates an error in UUFClient.
+     *
      * @param {string} message message of this error
      * @param {Object} [cause] cause of this error
      * @param {number} [statusCode] status code of this error
@@ -53,16 +54,15 @@ var UUFClient = {};
     }
 
     /**
-     * Creates a map from the zones defined in the comments.
+     * Populates a zones map by scanning HTML comments in the DOM.
      */
-    function generateZonesMap() {
+    function populateZonesMap() {
         zonesMap = {};
         $("*").contents().filter(function () {
             // For HTML comments, node type will be 8.
             return this.nodeType === 8;
         }).each(function (i, node) {
             var commentText = node.nodeValue;
-            console.log("commentText: " + commentText);
             if (commentText.startsWith(UUF_ZONE_COMMENT_PREFIX)) {
                 var zone;
                 try {
@@ -86,16 +86,17 @@ var UUFClient = {};
                 zonesMap[zone.name][zone.position] = node;
             }
         });
-        console.log("zonesMap: " + zonesMap);
     }
 
     /**
-     * Inserts the content to the zone using the mode.
-     * @param {string} content content to be inserted
-     * @param {string} zone zone to be used
-     * @param {string} mode mode to be used. This can be one of the PREPEND, APPEND, OVERWRITE values. PREPEND will
-     * add the fragment to the beginning of the zone. APPEND will add the fragment to the end of the zone. OVERWRITE
-     * will remove all of the content within the zone start and end comments and will add the content to the zone.
+     * Pushes the content to the specified zone according to the given mode.
+     *
+     * @param {string} content content to push
+     * @param {string} zone name of the zone to push
+     * @param {string} mode mode to use. Mode can be either PREPEND, APPEND or OVERWRITE. PREPEND will
+     *     add the fragment to the beginning of the existing content of that zone. Mode can be "PREPEND" (put the
+     *     pushing content before the existing content), "APPEND" (put the pushing content after the existing content)
+     *     or "OVERWRITE" (replace the existing content with the pushing content)
      */
     function pushContent(content, zone, mode) {
         if (!content) {
@@ -122,6 +123,7 @@ var UUFClient = {};
 
     /**
      * Check the zoneName and mode variables for null or empty.
+     *
      * @param {string} zoneName
      * @param {string} mode
      */
@@ -135,13 +137,12 @@ var UUFClient = {};
     }
 
     /**
-     * Render and insert the fragment to the given zone using the given mode.
-     * @param {string} fragmentFullyQualifiedName Fully qualified name of the fragment
-     * @param {Object} templateFillingObject data for the template
-     * @param {string} zoneName zone to be used
-     * @param {string} mode mode to be used. This can be one of the PREPEND, APPEND, OVERWRITE values. PREPEND will
-     * add the fragment to the beginning of the zone. APPEND will add the fragment to the end of the zone. OVERWRITE
-     * will remove all of the content within the zone start and end comments and will add the content to the zone.
+     * Renders the specified fragment and pushes to the given zone according to the given mode.
+     *
+     * @param {string} fragmentFullyQualifiedName fully qualified name of the fragment
+     * @param {?Object} templateFillingObject data for the template
+     * @param {string} zoneName name of the zone to push
+     * @param {string} mode mode to use
      */
     UUFClient.renderFragment = function (fragmentFullyQualifiedName, templateFillingObject, zoneName, mode) {
         if (!fragmentFullyQualifiedName) {
@@ -150,7 +151,7 @@ var UUFClient = {};
         checkNullOrEmpty(zoneName, mode);
 
         if (!zonesMap) {
-            generateZonesMap();
+            populateZonesMap();
         }
         var zone = zonesMap[zoneName];
         if (!zone) {
@@ -174,14 +175,12 @@ var UUFClient = {};
     };
 
     /**
-     * Get the embedded handlebars template from the page and render it using the data and insert it into
-     * the zone using the mode.
+     * Renders the specified embedded Handlebars template and pushes to the given zone according to the given mode.
+     *
      * @param {string} templateId id of the handlebars template
-     * @param {Object} templateFillingObject data for the template
-     * @param {string} zoneName zone to be used
-     * @param {string} mode mode to be used. This can be one of the PREPEND, APPEND, OVERWRITE values. PREPEND will
-     * add the fragment to the beginning of the zone. APPEND will add the fragment to the end of the zone. OVERWRITE
-     * will remove all of the content within the zone start and end comments and will add the content to the zone.
+     * @param {?Object} templateFillingObject data for the template
+     * @param {string} zoneName name of the zone to push
+     * @param {string} mode mode to use
      */
     UUFClient.renderTemplate = function (templateId, templateFillingObject, zoneName, mode) {
         if (!templateId) {
@@ -198,14 +197,13 @@ var UUFClient = {};
     };
 
     /**
-     * Get the handlebars template from the given url and render it using the data and insert it into
-     * the zone using the mode.
+     * Retrieves the Handlebars template from the specified URL and renders and pushes it to the given zone according
+     * to the given mode.
+     *
      * @param {string} templateUrl url of the template
-     * @param {object} [templateFillingObject] data for the template
-     * @param {string} zoneName zone to be used
-     * @param {string} mode mode to be used. This can be one of the PREPEND, APPEND, OVERWRITE values. PREPEND will
-     * add the fragment to the beginning of the zone. APPEND will add the fragment to the end of the zone. OVERWRITE
-     * will remove all of the content within the zone start and end comments and will add the content to the zone.
+     * @param {?Object} templateFillingObject data for the template
+     * @param {string} zoneName name of the zone to push
+     * @param {string} mode mode to use
      */
     UUFClient.renderTemplateUrl = function (templateUrl, templateFillingObject, zoneName, mode) {
         if (!templateUrl) {
@@ -234,13 +232,12 @@ var UUFClient = {};
     };
 
     /**
-     * Render the handlebars template using the data and insert it into the zone.
-     * @param {string} templateString handlebars template
-     * @param {Object} [templateFillingObject] data for the template
-     * @param {string} zoneName zone to be used
-     * @param {string} mode mode to be used. This can be one of the PREPEND, APPEND, OVERWRITE values. PREPEND will
-     * add the fragment to the beginning of the zone. APPEND will add the fragment to the end of the zone. OVERWRITE
-     * will remove all of the content within the zone start and end comments and will add the content to the zone.
+     * Renders the Handlebars template and pushes to the given zone according to the given mode.
+     *
+     * @param {string} templateString Handlebars template
+     * @param {?Object} templateFillingObject data for the template
+     * @param {string} zoneName name of the zone to push
+     * @param {string} mode mode to use
      */
     UUFClient.renderTemplateString = function (templateString, templateFillingObject, zoneName, mode) {
         if (!templateString) {
@@ -249,7 +246,7 @@ var UUFClient = {};
         checkNullOrEmpty(zoneName, mode);
 
         if (!zonesMap) {
-            generateZonesMap();
+            populateZonesMap();
         }
         var zone = zonesMap[zoneName];
         if (!zone) {
