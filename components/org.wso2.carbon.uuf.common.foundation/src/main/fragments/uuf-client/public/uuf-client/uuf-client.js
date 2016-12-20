@@ -63,28 +63,29 @@ var UUFClient = {};
             return this.nodeType === 8;
         }).each(function (i, node) {
             var commentText = node.nodeValue;
-            if (commentText.startsWith(UUF_ZONE_COMMENT_PREFIX)) {
-                var zone;
-                try {
-                    zone = JSON.parse(commentText.substring(UUF_ZONE_COMMENT_PREFIX.length));
-                } catch (e) {
-                    throw new UUFClientException("Cannot parse UUFClient zone comment '" + commentText
-                                                 + "' as a JSON.");
-                }
-                if (!zone.name) {
-                    throw new UUFClientException("Cannot find field 'name' in the UUFClient zone comment '"
-                                                 + commentText + "'.");
-                }
-                if (!zone.position) {
-                    throw new UUFClientException("Cannot find field 'position' in the UUFClient zone comment '"
-                                                 + commentText + "'.");
-                }
-
-                if (!zonesMap[zone.name]) {
-                    zonesMap[zone.name] = {};
-                }
-                zonesMap[zone.name][zone.position] = node;
+            if (!commentText.startsWith(UUF_ZONE_COMMENT_PREFIX)) {
+                return;
             }
+            var zone;
+            try {
+                zone = JSON.parse(commentText.substring(UUF_ZONE_COMMENT_PREFIX.length));
+            } catch (e) {
+                throw new UUFClientException("Cannot parse UUFClient zone comment '" + commentText
+                                             + "' as a JSON.");
+            }
+            if (!zone.name) {
+                throw new UUFClientException("Cannot find field 'name' in the UUFClient zone comment '"
+                                             + commentText + "'.");
+            }
+            if (!zone.position) {
+                throw new UUFClientException("Cannot find field 'position' in the UUFClient zone comment '"
+                                             + commentText + "'.");
+            }
+
+            if (!zonesMap[zone.name]) {
+                zonesMap[zone.name] = {};
+            }
+            zonesMap[zone.name][zone.position] = node;
         });
     }
 
@@ -218,8 +219,8 @@ var UUFClient = {};
                        var contentType = jqXHR.getResponseHeader("content-type") || "";
                        if (contentType.indexOf('text/x-handlebars-template') <= -1) {
                            throw new UUFClientException(
-                               "Incorrect content type received. Expected: text/x-handlebars-template,"
-                               + " Received: " + jqXHR.getResponseHeader("content-type"));
+                               "Response content type is incorrect. Found '" + jqXHR.getResponseHeader("content-type")
+                               + "' instead of 'text/x-handlebars-template'.");
                        }
                        UUFClient.renderTemplateString(data, templateFillingObject, zoneName, mode)
                    },
