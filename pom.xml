@@ -43,6 +43,7 @@
     <modules>
         <module>components</module>
         <module>themes</module>
+        <module>tests</module>
     </modules>
 
     <build>
@@ -105,6 +106,7 @@
     </build>
 
     <properties>
+        <carbon.uuf.version>1.0.0-SNAPSHOT</carbon.uuf.version>
         <!-- Maven Plugins -->
         <carbon-uuf-maven-plugin.version>1.0.0-m6</carbon-uuf-maven-plugin.version>
 
