@@ -21,11 +21,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.wso2.carbon.uuf.common</groupId>
-    <artifactId>tests-parent</artifactId>
+    <artifactId>samples-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>WSO2 UUF Common - Tests</name>
+    <name>WSO2 UUF Common - Samples</name>
     <url>http://wso2.org</url>
 
     <parent>
@@ -36,7 +36,7 @@
     </parent>
 
     <modules>
-        <module>apps/org.wso2.carbon.uuf.common.test.app</module>
+        <module>apps/org.wso2.carbon.uuf.common.sample-app</module>
     </modules>
 
 </project>
