@@ -1,0 +1,22 @@
+{{layout "org.wso2.carbon.uuf.common.foundation.main"}}
+{{title "Template Samples | " @config.appName}}
+{{#fillZone "content"}}
+    <h3>Render and push a template to a zone</h3>
+    <hr />
+    <p>You can render a fragment and push it to a uuf zone in a page.</p>
+    <p>Syntax : <code>UUFClient.renderTemplate(templateId, templateFillingObject, zoneName, mode);</code></p>
+
+    <p>In here, the mode can be one of the following.</p>
+    <ul>
+        <li>"PREPEND" - put the pushing content before the existing content</li>
+        <li>"APPEND" - put the pushing content after the existing content</li>
+        <li>"OVERWRITE" - replace the existing content with the pushing content</li>
+    </ul>
+
+    <p>Add <b>uuf-client</b> fragment to the template.</p>
+    <pre>\{{fragment "org.wso2.carbon.uuf.common.foundation.uuf-client"}}</pre>
+
+    <p>Add the following line to the client side JS file.</p>
+    <pre>UUFClient.renderTemplate(TEMPLATE_ID, {"msgTitle":"test", "msgBody":"sample"}, "content", "APPEND");</pre>
+
+{{/fillZone}}

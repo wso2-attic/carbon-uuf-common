@@ -1,6 +1,14 @@
 {{layout "org.wso2.carbon.uuf.common.foundation.main"}}
-{{title "Test| " @config.appName}}
+{{title "Samples | " @config.appName}}
 {{fragment "org.wso2.carbon.uuf.common.foundation.uuf-client"}}
+
 {{#fillZone "content"}}
-    <h1>Hello World!</h1>
+    <h3>UUF Client Demos.</h3>
+    <hr />
+    <p>UUF Client provides a rich set of features to make the life easier of the web app developer. Following demos
+       covers some of them.</p>
+    <ul>
+        <li><a href="{{@contextPath}}/uuf-client/fragment">Pushing a fragment to a zone</a></li>
+        <li><a href="{{@contextPath}}/uuf-client/template">Pushing a template to a zone</a></li>
+    </ul>
 {{/fillZone}}
