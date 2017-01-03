@@ -1,22 +1,96 @@
 {{layout "org.wso2.carbon.uuf.common.foundation.main"}}
-{{title "Template Samples | " @config.appName}}
+{{title "Fragment Samples | " @config.appName}}
+{{fragment "org.wso2.carbon.uuf.common.foundation.uuf-client"}}
+
 {{#fillZone "content"}}
     <h3>Render and push a template to a zone</h3>
     <hr />
-    <p>You can render a fragment and push it to a uuf zone in a page.</p>
+    <p>You can render a template and push it to a zone in a page using the <b>uuf-client</b> library.</p>
     <p>Syntax : <code>UUFClient.renderTemplate(templateId, templateFillingObject, zoneName, mode);</code></p>
 
-    <p>In here, the mode can be one of the following.</p>
+    <p>The <b>mode</b> can be one of the following.</p>
     <ul>
         <li>"PREPEND" - put the pushing content before the existing content</li>
         <li>"APPEND" - put the pushing content after the existing content</li>
         <li>"OVERWRITE" - replace the existing content with the pushing content</li>
     </ul>
 
-    <p>Add <b>uuf-client</b> fragment to the template.</p>
+    <p>Add <b>uuf-client</b> fragment to the page.</p>
     <pre>\{{fragment "org.wso2.carbon.uuf.common.foundation.uuf-client"}}</pre>
 
-    <p>Add the following line to the client side JS file.</p>
-    <pre>UUFClient.renderTemplate(TEMPLATE_ID, {"msgTitle":"test", "msgBody":"sample"}, "content", "APPEND");</pre>
+    <p>You can use the <b>uuf-client</b> library in the client side JS file like below.</p>
+    <pre>UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.message", {"msgClass":"test", "class":"test","msgBody":"sample"}, "content", "APPEND");</pre>
+
+    <h3 style="margin-top: 40px;">Demo</h3>
+    <hr />
+    <P>In here, embedded <b>sample-template</b> Handlebars template will be rendered and pushed to the
+        <b>sample-area</b> zone.</P>
+    <hr />
+    <div>
+        <form>
+            <div class="form-group">
+                <label for="text">Text</label>
+                <input type="text" class="form-control" id="text" placeholder="Enter text here">
+            </div>
+            <div class="form-group">
+                <label for="mode">Mode</label>
+                <select class="form-control" id="mode">
+                    <option value="PREPEND" selected>PREPEND</option>
+                    <option value="APPEND">APPEND</option>
+                    <option value="OVERWRITE">OVERWRITE</option>
+                </select>
+            </div>
+            <button id="pushToZone" class="btn btn-primary" type="button">Push</button>
+        </form>
+
+        {{#fillZone "sample-area"}}
+            <h2>This is the <b>sample-area</b> zone. Try pushing message fragments to this zone.</h2>
+        {{/fillZone}}
+        {{defineZone "sample-area"}}
+    </div>
+
+    {{#template "sample-template"}}
+        <div class="message">
+            <h4>
+                {{#if msgTitle}}
+                    {{msgTitle}}
+                {{/if}}
+            </h4>
+            {{#if msgBody}}
+                <p>{{msgBody}}</p>
+            {{/if}}
+        </div>
+    {{/template}}
+
+    <script>
+        $("#pushToZone").on("click", function (evt) {
+            var text = $("#text").val();
+            if (!text) {
+                alert("Please enter text.");
+            } else {
+                var mode = $("#mode").val();
+                if (!mode) {
+                    alert("Mode not found.");
+                } else {
+                    switch (mode) {
+                        case "OVERWRITE":
+                        case "PREPEND":
+                        case "APPEND":
+                            UUFClient.renderTemplate("sample-template",
+                                                     {
+                                                         "msgClass": "test",
+                                                         "class": "test",
+                                                         "msgTitle": "Title",
+                                                         "msgBody": text
+                                                     },
+                                                     "sample-area", mode);
+                            break;
+                        default:
+                            alert(mode + " is not supported.")
+                    }
+                }
+            }
+        });
+    </script>
 
 {{/fillZone}}
