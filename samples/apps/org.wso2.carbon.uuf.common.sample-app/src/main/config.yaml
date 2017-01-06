@@ -1,2 +1,12 @@
-appName: Test
-theme: "org.wso2.carbon.uuf.common.theme.default"
+appName: Sample App
+theme : org.wso2.carbon.uuf.common.theme.default
+menu :
+  main :
+    Home : {link: "", icon: "fw-home"}
+    Samples:
+      uuf-client:
+        Pushing a fragment: {link: "uuf-client/fragment"}
+        Pushing a template: {link: "uuf-client/template"}
+errorPages:
+  "404": /foundation/error/404
+  default: /foundation/error/default

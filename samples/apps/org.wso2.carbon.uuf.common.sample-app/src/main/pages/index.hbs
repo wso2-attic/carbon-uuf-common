@@ -1,6 +1,16 @@
 {{layout "org.wso2.carbon.uuf.common.foundation.main"}}
-{{title "Test| " @config.appName}}
-{{fragment "org.wso2.carbon.uuf.common.foundation.uuf-client"}}
+{{title "Samples | " @config.appName}}
+
 {{#fillZone "content"}}
-    <h1>Hello World!</h1>
+    <h3>Samples</h3>
+    <hr />
+
+    <ol>
+        <li><h4>uuf-client</h4>
+            <ol>
+                <li><a href="{{@contextPath}}/uuf-client/fragment">Pushing a fragment</a></li>
+                <li><a href="{{@contextPath}}/uuf-client/template">Pushing a template</a></li>
+            </ol>
+        </li>
+    </ol>
 {{/fillZone}}
