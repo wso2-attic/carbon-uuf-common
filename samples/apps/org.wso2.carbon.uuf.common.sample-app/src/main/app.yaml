@@ -15,7 +15,7 @@ menus:
               - text: "Pushing a fragment"
                 link: "/uuf-client/fragment"
               - text: "Pushing a template"
-                link: "uuf-client/template"
+                link: "/uuf-client/template"
 
 errorPages:
   404: /foundation/error/404
