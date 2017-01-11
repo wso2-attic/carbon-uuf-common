@@ -162,8 +162,9 @@ var UUFClient = {};
         var url = contextPath + "/fragments/" + fragmentFullyQualifiedName;
         $.ajax({
                    url: url,
-                   type: "GET",
-                   data: templateFillingObject,
+                   type: "POST",
+                   contentType: 'application/json',
+                   data: JSON.stringify(templateFillingObject),
                    success: function (data, textStatus, jqXHR) {
                        pushContent(data, zone, mode);
                    },
