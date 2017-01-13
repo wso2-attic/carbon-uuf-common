@@ -34,7 +34,7 @@
     </parent>
 
     <modules>
-        <module>apps/org.wso2.carbon.uuf.common.sample-app</module>
+        <module>apps/org.wso2.carbon.uuf.common.sample-app.app</module>
     </modules>
 
 </project>
