@@ -10,7 +10,7 @@ $(document).ready(function () {
             alert("Please select a mode.");
             return;
         }
-        UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.message",
+        UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.ui.message",
                                  {
                                      "class": "message",
                                      "msgClass": "default",
