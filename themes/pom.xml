@@ -34,7 +34,7 @@
     </parent>
 
     <modules>
-        <module>org.wso2.carbon.uuf.common.theme.default</module>
+        <module>org.wso2.carbon.uuf.common.theme.default.theme</module>
     </modules>
 
 </project>

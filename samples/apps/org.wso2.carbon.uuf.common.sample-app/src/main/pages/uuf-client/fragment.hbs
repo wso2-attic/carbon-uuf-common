@@ -1,6 +1,6 @@
-{{layout "org.wso2.carbon.uuf.common.foundation.main"}}
+{{layout "org.wso2.carbon.uuf.common.foundation.ui.main"}}
 {{title "Fragment Samples | " @config.appName}}
-{{fragment "org.wso2.carbon.uuf.common.foundation.uuf-client"}}
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
 
 {{#fillZone "content"}}
     <h3>Pushing a fragment</h3>
@@ -17,10 +17,10 @@
     </ul>
 
     <p>Add <b>uuf-client</b> fragment to the page.</p>
-    <pre>\{{fragment "org.wso2.carbon.uuf.common.foundation.uuf-client"}}</pre>
+    <pre>\{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}</pre>
 
     <p>You can use the <b>uuf-client</b> library in the client side JS file like below.</p>
-    <pre>UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.message", {"msgClass":"test", "class":"test","msgBody":"sample"}, "content", "APPEND");</pre>
+    <pre>UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.ui.message", {"msgClass":"test", "class":"test","msgBody":"sample"}, "content", "APPEND");</pre>
 
     <h3 style="margin-top: 40px;">Demo</h3>
     <hr />
