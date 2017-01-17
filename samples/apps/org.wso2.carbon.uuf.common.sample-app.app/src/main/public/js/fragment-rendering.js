@@ -10,6 +10,18 @@ $(document).ready(function () {
             alert("Please select a mode.");
             return;
         }
+
+        $("#spinner").show();
+
+        var callbacks = {
+            "onSuccess": function () {
+                $("#spinner").hide();
+            }, "onFailure": function (message, e) {
+                $("#spinner").hide();
+                alert(message)
+            }
+        };
+
         UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.ui.message",
                                  {
                                      "class": "message",
@@ -17,6 +29,6 @@ $(document).ready(function () {
                                      "msgTitle": "Title",
                                      "msgBody": message
                                  },
-                                 "sample-area", mode);
+                                 "sample-area", mode, callbacks);
     });
 });

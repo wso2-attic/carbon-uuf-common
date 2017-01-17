@@ -1,6 +1,7 @@
 {{layout "org.wso2.carbon.uuf.common.foundation.ui.main"}}
 {{title "Fragment Samples | " @config.appName}}
 {{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
+{{css "css/styles.css"}}
 
 {{#fillZone "content"}}
     <h3>Render and push a template to a zone</h3>
@@ -53,10 +54,12 @@
     </div>
 
     <div class="col-lg-12 add-margin-2x" style="background-color: #f5f5f5; ">
-        {{#fillZone "sample-area"}}
+        {{#defineZone "sample-area"}}
+            <div id="spinner" style="display: none;">
+                <i class="fw fw-loader5 fw-spin fw-5x absolute-center"></i>
+            </div>
             <h3>This is the <b>sample-area</b> zone. Try pushing message fragments to this zone.</h3>
-        {{/fillZone}}
-        {{defineZone "sample-area"}}
+        {{/defineZone}}
     </div>
 
     {{#template "sample-template"}}

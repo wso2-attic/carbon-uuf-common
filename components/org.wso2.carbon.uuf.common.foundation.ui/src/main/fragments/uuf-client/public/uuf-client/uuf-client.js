@@ -55,6 +55,8 @@ var UUFClient = {};
 
     /**
      * Populates a zones map by scanning HTML comments in the DOM.
+     *
+     * @returns {string} error error message if an error occurs
      */
     function populateZonesMap() {
         zonesMap = {};
@@ -70,16 +72,13 @@ var UUFClient = {};
             try {
                 zone = JSON.parse(commentText.substring(UUF_ZONE_COMMENT_PREFIX.length));
             } catch (e) {
-                throw new UUFClientException("Cannot parse UUFClient zone comment '" + commentText
-                                             + "' as a JSON.");
+                return "Cannot parse UUFClient zone comment '" + commentText + "' as a JSON.";
             }
             if (!zone.name) {
-                throw new UUFClientException("Cannot find field 'name' in the UUFClient zone comment '"
-                                             + commentText + "'.");
+                return "Cannot find field 'name' in the UUFClient zone comment '" + commentText + "'.";
             }
             if (!zone.position) {
-                throw new UUFClientException("Cannot find field 'position' in the UUFClient zone comment '"
-                                             + commentText + "'.");
+                return "Cannot find field 'position' in the UUFClient zone comment '" + commentText + "'.";
             }
 
             if (!zonesMap[zone.name]) {
@@ -98,6 +97,8 @@ var UUFClient = {};
      *     add the fragment to the beginning of the existing content of that zone. Mode can be "PREPEND" (put the
      *     pushing content before the existing content), "APPEND" (put the pushing content after the existing content)
      *     or "OVERWRITE" (replace the existing content with the pushing content)
+     *
+     * @returns {string} error error message if an error occurs
      */
     function pushContent(content, zone, mode) {
         if (!content) {
@@ -118,7 +119,7 @@ var UUFClient = {};
                 $(zone.start).after(content);
                 break;
             default:
-                throw new UUFClientException("Mode '" + mode + "' is not supported.");
+                return "Mode '" + mode + "' is not supported.";
         }
     }
 
@@ -127,13 +128,15 @@ var UUFClient = {};
      *
      * @param {string} zoneName
      * @param {string} mode
+     *
+     * @returns {string} error error message if an error occurs
      */
     function checkNullOrEmpty(zoneName, mode) {
         if (!zoneName) {
-            throw new UUFClientException("Zone name cannot be null or empty.");
+            return "Zone name cannot be null or empty.";
         }
         if (!mode) {
-            throw new UUFClientException("Mode cannot be null or empty.");
+            return "Mode cannot be null or empty.";
         }
     }
 
@@ -144,19 +147,29 @@ var UUFClient = {};
      * @param {?Object} templateFillingObject data for the template
      * @param {string} zoneName name of the zone to push
      * @param {string} mode mode to use
+     * @param {Function} callbacks callback function
      */
-    UUFClient.renderFragment = function (fragmentFullyQualifiedName, templateFillingObject, zoneName, mode) {
+    UUFClient.renderFragment = function (fragmentFullyQualifiedName, templateFillingObject, zoneName, mode, callbacks) {
         if (!fragmentFullyQualifiedName) {
             throw new UUFClientException("Fragment name cannot be null or empty.");
         }
         checkNullOrEmpty(zoneName, mode);
 
         if (!zonesMap) {
-            populateZonesMap();
+            var error = populateZonesMap();
+            if (error) {
+                if (callbacks["onFailure"]) {
+                    callbacks["onFailure"](error);
+                }
+                return;
+            }
         }
         var zone = zonesMap[zoneName];
         if (!zone) {
-            throw new UUFClientException("Zone '" + zoneName + "' does not exists in current DOM.");
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"]("Zone '" + zoneName + "' does not exists in current DOM.");
+            }
+            return;
         }
 
         var url = contextPath + "/fragments/" + fragmentFullyQualifiedName;
@@ -166,12 +179,24 @@ var UUFClient = {};
                    contentType: 'application/json',
                    data: JSON.stringify(templateFillingObject),
                    success: function (data, textStatus, jqXHR) {
-                       pushContent(data, zone, mode);
+                       var error = pushContent(data, zone, mode);
+                       if (error) {
+                           if (callbacks["onFailure"]) {
+                               callbacks["onFailure"](error);
+                           }
+                           return;
+                       }
+
+                       if (callbacks["onSuccess"]) {
+                           callbacks["onSuccess"](data);
+                       }
                    },
                    error: function (jqXHR, textStatus, errorThrown) {
-                       throw new UUFClientException("Error occurred while retrieving fragment '"
-                                                    + fragmentFullyQualifiedName + "' from '" + url
-                                                    + "'.", errorThrown, jqXHR.status);
+                       if (callbacks["onFailure"]) {
+                           var msg = "Error occurred while retrieving fragment '" + fragmentFullyQualifiedName
+                                     + "' from '" + url + "'.";
+                           callbacks["onFailure"](msg, errorThrown);
+                       }
                    }
                });
     };
@@ -183,18 +208,30 @@ var UUFClient = {};
      * @param {?Object} templateFillingObject data for the template
      * @param {string} zoneName name of the zone to push
      * @param {string} mode mode to use
+     * @param {Function} callbacks callback function
      */
-    UUFClient.renderTemplate = function (templateId, templateFillingObject, zoneName, mode) {
+    UUFClient.renderTemplate = function (templateId, templateFillingObject, zoneName, mode, callbacks) {
         if (!templateId) {
-            throw new UUFClientException("Template name cannot be null or empty.");
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"]("Template name cannot be null or empty.");
+            }
+            return;
         }
-        checkNullOrEmpty(zoneName, mode);
+        var error = checkNullOrEmpty(zoneName, mode);
+        if (error) {
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"](error);
+            }
+            return;
+        }
 
         var source = $("#" + templateId).html();
         if (source) {
-            UUFClient.renderTemplateString(source, templateFillingObject, zoneName, mode);
+            UUFClient.renderTemplateString(source, templateFillingObject, zoneName, mode, callbacks);
         } else {
-            throw new UUFClientException("Template '" + templateId + "' not found");
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"]("Template '" + templateId + "' not found.");
+            }
         }
     };
 
@@ -206,12 +243,23 @@ var UUFClient = {};
      * @param {?Object} templateFillingObject data for the template
      * @param {string} zoneName name of the zone to push
      * @param {string} mode mode to use
+     * @param {Function} callbacks callback function
      */
-    UUFClient.renderTemplateUrl = function (templateUrl, templateFillingObject, zoneName, mode) {
+    UUFClient.renderTemplateUrl = function (templateUrl, templateFillingObject, zoneName, mode, callbacks) {
         if (!templateUrl) {
-            throw new UUFClientException("Template url cannot be null or empty.");
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"]("Template url cannot be null or empty.");
+            }
+            return;
         }
-        checkNullOrEmpty(zoneName, mode);
+
+        var error = checkNullOrEmpty(zoneName, mode);
+        if (error) {
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"](error);
+            }
+            return;
+        }
 
         $.ajax({
                    url: templateUrl,
@@ -219,16 +267,24 @@ var UUFClient = {};
                    success: function (data, textStatus, jqXHR) {
                        var contentType = jqXHR.getResponseHeader("content-type") || "";
                        if (contentType.indexOf('text/x-handlebars-template') <= -1) {
-                           throw new UUFClientException(
-                               "Response content type is incorrect. Found '" + jqXHR.getResponseHeader("content-type")
-                               + "' instead of 'text/x-handlebars-template'.");
+                           if (callbacks["onFailure"]) {
+                               callbacks["onFailure"](
+                                   "Response content type is incorrect. Found '" + jqXHR.getResponseHeader(
+                                       "content-type")
+                                   + "' instead of 'text/x-handlebars-template'.");
+                           }
+                           return;
                        }
-                       UUFClient.renderTemplateString(data, templateFillingObject, zoneName, mode)
+                       UUFClient.renderTemplateString(data, templateFillingObject, zoneName, mode);
+                       if (callbacks["onSuccess"]) {
+                           callbacks["onSuccess"](data);
+                       }
                    },
                    error: function (jqXHR, textStatus, errorThrown) {
-                       throw new UUFClientException(
-                           "Error occurred while retrieving template from " + templateUrl
-                           + ".", errorThrown, jqXHR.status);
+                       if (callbacks["onFailure"]) {
+                           callbacks["onFailure"]("Error occurred while retrieving template from " + templateUrl
+                                                  + ".", errorThrown);
+                       }
                    }
                });
     };
@@ -240,26 +296,52 @@ var UUFClient = {};
      * @param {?Object} templateFillingObject data for the template
      * @param {string} zoneName name of the zone to push
      * @param {string} mode mode to use
+     * @param {Function} callbacks callback function
      */
-    UUFClient.renderTemplateString = function (templateString, templateFillingObject, zoneName, mode) {
+    UUFClient.renderTemplateString = function (templateString, templateFillingObject, zoneName, mode, callbacks) {
         if (!templateString) {
-            throw new UUFClientException("Template string cannot be null or empty.");
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"]("Template string cannot be null or empty.");
+            }
+            return;
         }
-        checkNullOrEmpty(zoneName, mode);
+
+        var error = checkNullOrEmpty(zoneName, mode, callbacks);
+        if (error) {
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"](error);
+            }
+            return;
+        }
 
         if (!zonesMap) {
-            populateZonesMap();
+            error = populateZonesMap();
+            if (error) {
+                if (callbacks["onFailure"]) {
+                    callbacks["onFailure"](error);
+                }
+                return;
+            }
         }
+
         var zone = zonesMap[zoneName];
         if (!zone) {
-            throw new UUFClientException("Zone '" + zoneName + "' does not exists in current DOM.");
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"]("Zone '" + zoneName + "' does not exists in current DOM.");
+            }
         }
 
         try {
             var template = Handlebars.compile(templateString);
-            pushContent(template(templateFillingObject), zone, mode);
+            var html = template(templateFillingObject);
+            pushContent(html, zone, mode);
+            if (callbacks["onSuccess"]) {
+                callbacks["onSuccess"](html);
+            }
         } catch (e) {
-            throw new UUFClientException("Error occurred while compiling the handlebar template.", e);
+            if (callbacks["onFailure"]) {
+                callbacks["onFailure"]("Error occurred while compiling the handlebar template.", e);
+            }
         }
     };
 

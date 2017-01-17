@@ -10,11 +10,23 @@ $(document).ready(function () {
             alert("Please select a mode.");
             return;
         }
+
+        $("#spinner").show();
+
+        var callbacks = {
+            "onSuccess": function () {
+                $("#spinner").hide();
+            }, "onFailure": function (message, e) {
+                $("#spinner").hide();
+                alert(message)
+            }
+        };
+
         UUFClient.renderTemplate("sample-template",
                                  {
                                      "msgTitle": "Title",
                                      "msgBody": message
                                  },
-                                 "sample-area", mode);
+                                 "sample-area", mode, callbacks);
     });
 });
