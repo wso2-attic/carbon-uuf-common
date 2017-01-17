@@ -142,9 +142,9 @@ var UUFClient = {};
         if (!mode) {
             throw new UUFClientException("Mode cannot be null or empty.");
         }
-        if (mode != MODE_APPEND || mode != MODE_PREPEND || mode != MODE_OVERWRITE) {
+        if (mode != MODE_APPEND && mode != MODE_PREPEND && mode != MODE_OVERWRITE) {
             throw new UUFClientException("Mode should be one of '" + MODE_APPEND + "," + MODE_PREPEND + ","
-                                         + MODE_OVERWRITE + "'.");
+                                         + MODE_OVERWRITE + "'. Instead found '" + mode + "'.");
         }
         if (!callbacks[CALLBACK_ON_SUCCESS]) {
             throw new UUFClientException("Function '" + CALLBACK_ON_SUCCESS + "' not found in callbacks.");
