@@ -1,4 +1,8 @@
 $(document).ready(function () {
+
+    // Hide the loading animation at startup
+    $('[data-toggle="loading"]').loading('hide');
+
     $("#pushToZone").on("click", function () {
         var message = $("#message").val();
         if (!message) {
@@ -10,11 +14,27 @@ $(document).ready(function () {
             alert("Please select a mode.");
             return;
         }
-        UUFClient.renderTemplate("sample-template",
-                                 {
-                                     "msgTitle": "Title",
-                                     "msgBody": message
-                                 },
-                                 "sample-area", mode);
+
+        $('[data-toggle="loading"]').loading('show');
+
+        var fillingObject = {
+            "msgTitle": "Title",
+            "msgBody": message
+        };
+
+        var callbacks = {
+            onSuccess: function () {
+                $('[data-toggle="loading"]').loading('hide');
+            },
+            onFailure: function (message, e) {
+                $('[data-toggle="loading"]').loading('hide');
+                alert(message + ", " + e);
+            }
+        };
+
+        // setTimeout() is used to simulate network throttling and show the loading animation
+        setTimeout(function () {
+            UUFClient.renderTemplate("sample-template", fillingObject, "sample-area", mode, callbacks);
+        }, 2000);
     });
 });
