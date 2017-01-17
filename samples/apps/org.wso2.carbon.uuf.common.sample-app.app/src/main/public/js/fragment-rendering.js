@@ -1,5 +1,6 @@
 $(document).ready(function () {
 
+    // Hide the loading animation at startup
     $('[data-toggle="loading"]').loading('hide');
 
     $("#pushToZone").on("click", function () {
@@ -16,22 +17,26 @@ $(document).ready(function () {
 
         $('[data-toggle="loading"]').loading('show');
 
+        var fillingObject = {
+            "class": "message",
+            "msgClass": "default",
+            "msgTitle": "Title",
+            "msgBody": message
+        };
         var callbacks = {
-            "onSuccess": function () {
+            onSuccess: function () {
                 $('[data-toggle="loading"]').loading('hide');
-            }, "onFailure": function (message, e) {
+            },
+            onFailure: function (message, e) {
                 $('[data-toggle="loading"]').loading('hide');
-                alert(message)
+                alert(message);
             }
         };
 
-        UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.ui.message",
-                                 {
-                                     "class": "message",
-                                     "msgClass": "default",
-                                     "msgTitle": "Title",
-                                     "msgBody": message
-                                 },
-                                 "sample-area", mode, callbacks);
+        // setTimeout() is used to simulate network throttling and show the loading animation
+        setTimeout(function () {
+            UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.ui.message", fillingObject, "sample-area",
+                                     mode, callbacks);
+        }, 2000);
     });
 });
