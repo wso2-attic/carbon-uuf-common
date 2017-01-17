@@ -1,4 +1,7 @@
 $(document).ready(function () {
+
+    $('[data-toggle="loading"]').loading('hide');
+
     $("#pushToZone").on("click", function () {
         var message = $("#message").val();
         if (!message) {
@@ -11,13 +14,13 @@ $(document).ready(function () {
             return;
         }
 
-        $("#spinner").show();
+        $('[data-toggle="loading"]').loading('show');
 
         var callbacks = {
             "onSuccess": function () {
-                $("#spinner").hide();
+                $('[data-toggle="loading"]').loading('hide');
             }, "onFailure": function (message, e) {
-                $("#spinner").hide();
+                $('[data-toggle="loading"]').loading('hide');
                 alert(message)
             }
         };
