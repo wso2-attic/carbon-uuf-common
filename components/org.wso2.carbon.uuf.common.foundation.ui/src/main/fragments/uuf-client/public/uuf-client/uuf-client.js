@@ -23,12 +23,12 @@ var UUFClient = {};
 
     var UUF_ZONE_COMMENT_PREFIX = "[UUF-ZONE]";
 
-    var ON_SUCCESS = "onSuccess";
-    var ON_FAILURE = "onFailure";
+    var CALLBACK_ON_SUCCESS = "onSuccess";
+    var CALLBACK_ON_FAILURE = "onFailure";
 
-    var APPEND = "APPEND";
-    var PREPEND = "PREPEND";
-    var OVERWRITE = "OVERWRITE";
+    var MODE_APPEND = "APPEND";
+    var MODE_PREPEND = "PREPEND";
+    var MODE_OVERWRITE = "OVERWRITE";
 
     /**
      * Zones in the current DOM.
@@ -114,15 +114,15 @@ var UUFClient = {};
         }
 
         switch (mode) {
-            case OVERWRITE:
+            case MODE_OVERWRITE:
                 var innerContents = $(zone.start).parent().contents();
                 innerContents.slice(innerContents.index($(zone.start)) + 1, innerContents.index($(zone.end))).remove();
                 $(zone.start).after(content);
                 break;
-            case APPEND:
+            case MODE_APPEND:
                 $(zone.end).before(content);
                 break;
-            case PREPEND:
+            case MODE_PREPEND:
                 $(zone.start).after(content);
                 break;
         }
@@ -142,14 +142,15 @@ var UUFClient = {};
         if (!mode) {
             throw new UUFClientException("Mode cannot be null or empty.");
         }
-        if (mode == APPEND || mode == PREPEND || mode == OVERWRITE) {
-            throw new UUFClientException("Mode '" + mode + "' is not supported.");
+        if (mode != MODE_APPEND || mode != MODE_PREPEND || mode != MODE_OVERWRITE) {
+            throw new UUFClientException("Mode should be one of '" + MODE_APPEND + "," + MODE_PREPEND + ","
+                                         + MODE_OVERWRITE + "'.");
         }
-        if (!callbacks[ON_SUCCESS]) {
-            throw new UUFClientException("'" + ON_SUCCESS + "' callback function not found.");
+        if (!callbacks[CALLBACK_ON_SUCCESS]) {
+            throw new UUFClientException("Function '" + CALLBACK_ON_SUCCESS + "' not found in callbacks.");
         }
-        if (!callbacks[ON_FAILURE]) {
-            throw new UUFClientException("'" + ON_FAILURE + "' callback function not found.");
+        if (!callbacks[CALLBACK_ON_FAILURE]) {
+            throw new UUFClientException("Function '" + CALLBACK_ON_FAILURE + "' not found in callbacks.");
         }
     }
 
@@ -186,15 +187,15 @@ var UUFClient = {};
                    success: function (data, textStatus, jqXHR) {
                        try {
                            pushContent(data, zone, mode);
-                           callbacks[ON_SUCCESS](data);
+                           callbacks[CALLBACK_ON_SUCCESS](data);
                        } catch (e) {
-                           callbacks[ON_FAILURE]("Error occurred while pushing the content.", e);
+                           callbacks[CALLBACK_ON_FAILURE]("Error occurred while pushing the content.", e);
                        }
                    },
                    error: function (jqXHR, textStatus, errorThrown) {
                        var msg = "Error occurred while retrieving fragment '" + fragmentFullyQualifiedName
                                  + "' from '" + url + "'.";
-                       callbacks[ON_FAILURE](msg, errorThrown);
+                       callbacks[CALLBACK_ON_FAILURE](msg, errorThrown);
                    }
                });
     };
@@ -249,11 +250,12 @@ var UUFClient = {};
                                + "' instead of 'text/x-handlebars-template'.");
                        }
                        UUFClient.renderTemplateString(data, templateFillingObject, zoneName, mode);
-                       callbacks[ON_SUCCESS](data);
+                       callbacks[CALLBACK_ON_SUCCESS](data);
                    },
                    error: function (jqXHR, textStatus, errorThrown) {
-                       callbacks[ON_FAILURE]("Error occurred while retrieving template from " + templateUrl + ".",
-                                             errorThrown);
+                       callbacks[CALLBACK_ON_FAILURE](
+                           "Error occurred while retrieving template from " + templateUrl + ".",
+                           errorThrown);
                    }
                });
     };
@@ -286,9 +288,9 @@ var UUFClient = {};
             var template = Handlebars.compile(templateString);
             var html = template(templateFillingObject);
             pushContent(html, zone, mode);
-            callbacks[ON_SUCCESS](html);
+            callbacks[CALLBACK_ON_SUCCESS](html);
         } catch (e) {
-            callbacks[ON_FAILURE]("Error occurred while compiling the handlebar template.", e);
+            callbacks[CALLBACK_ON_FAILURE]("Error occurred while compiling the handlebar template.", e);
         }
     };
 
