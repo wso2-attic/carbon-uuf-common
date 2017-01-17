@@ -6,7 +6,7 @@
     <h3>Render and push a template to a zone</h3>
     <hr />
     <p>You can render a template and push it to a zone in a page using the <b>uuf-client</b> library.</p>
-    <p>Syntax : <code>UUFClient.renderTemplate(templateId, templateFillingObject, zoneName, mode);</code></p>
+    <p>Syntax : <code>UUFClient.renderTemplate(templateId, templateFillingObject, zoneName, mode, callbacks);</code></p>
 
     <p>The <b>mode</b> can be one of the following.</p>
     <ul>
@@ -19,7 +19,17 @@
     <pre>\{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}</pre>
 
     <p>You can use the <b>uuf-client</b> library in the client side JS file like below.</p>
-    <pre>UUFClient.renderFragment("org.wso2.carbon.uuf.common.foundation.ui.message", {"msgClass":"test", "class":"test","msgBody":"sample"}, "content", "APPEND");</pre>
+    <pre>UUFClient.renderTemplate("sample-template", {"msgTitle": "Title","msgBody": message} , "sample-area", mode, callbacks);</pre>
+
+    <h4>Sample callback</h4>
+    <pre>var callbacks = {
+    onSuccess: function () {
+        // do something
+    },
+    onFailure: function (message, e) {
+        // do something
+    }
+};</pre>
 
     <h3 style="margin-top: 40px;">Demo</h3>
     <hr />
