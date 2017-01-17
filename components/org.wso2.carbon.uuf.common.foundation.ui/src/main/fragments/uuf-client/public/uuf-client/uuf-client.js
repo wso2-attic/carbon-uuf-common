@@ -22,6 +22,8 @@ var UUFClient = {};
 (function (UUFClient) {
 
     var UUF_ZONE_COMMENT_PREFIX = "[UUF-ZONE]";
+    var ON_SUCCESS = "onSuccess";
+    var ON_FAILURE = "onFailure";
 
     /**
      * Zones in the current DOM.
@@ -136,10 +138,10 @@ var UUFClient = {};
         if (!mode) {
             throw new UUFClientException("Mode cannot be null or empty.");
         }
-        if (!callbacks["onSuccess"]) {
+        if (!callbacks[ON_SUCCESS]) {
             throw new UUFClientException("'onSuccess' callback function not found.");
         }
-        if (!callbacks["onFailure"]) {
+        if (!callbacks[ON_FAILURE]) {
             throw new UUFClientException("'onFailure' callback function not found.");
         }
     }
@@ -176,15 +178,15 @@ var UUFClient = {};
                    success: function (data, textStatus, jqXHR) {
                        var error = pushContent(data, zone, mode);
                        if (error) {
-                           callbacks["onFailure"](error);
+                           callbacks[ON_FAILURE](error);
                            return;
                        }
-                       callbacks["onSuccess"](data);
+                       callbacks[ON_SUCCESS](data);
                    },
                    error: function (jqXHR, textStatus, errorThrown) {
                        var msg = "Error occurred while retrieving fragment '" + fragmentFullyQualifiedName
                                  + "' from '" + url + "'.";
-                       callbacks["onFailure"](msg, errorThrown);
+                       callbacks[ON_FAILURE](msg, errorThrown);
                    }
                });
     };
@@ -239,10 +241,10 @@ var UUFClient = {};
                                + "' instead of 'text/x-handlebars-template'.");
                        }
                        UUFClient.renderTemplateString(data, templateFillingObject, zoneName, mode);
-                       callbacks["onSuccess"](data);
+                       callbacks[ON_SUCCESS](data);
                    },
                    error: function (jqXHR, textStatus, errorThrown) {
-                       callbacks["onFailure"]("Error occurred while retrieving template from " + templateUrl + ".",
+                       callbacks[ON_FAILURE]("Error occurred while retrieving template from " + templateUrl + ".",
                                               errorThrown);
                    }
                });
@@ -266,7 +268,7 @@ var UUFClient = {};
         if (!zonesMap) {
             var error = populateZonesMap();
             if (error) {
-                callbacks["onFailure"](error);
+                callbacks[ON_FAILURE](error);
                 return;
             }
         }
@@ -280,9 +282,9 @@ var UUFClient = {};
             var template = Handlebars.compile(templateString);
             var html = template(templateFillingObject);
             pushContent(html, zone, mode);
-            callbacks["onSuccess"](html);
+            callbacks[ON_SUCCESS](html);
         } catch (e) {
-            callbacks["onFailure"]("Error occurred while compiling the handlebar template.", e);
+            callbacks[ON_FAILURE]("Error occurred while compiling the handlebar template.", e);
         }
     };
 
