@@ -29,7 +29,7 @@ $(document).ready(function () {
             },
             onFailure: function (message, e) {
                 $('[data-toggle="loading"]').loading('hide');
-                alert(message);
+                alert(message + ", " + e);
             }
         };
 
