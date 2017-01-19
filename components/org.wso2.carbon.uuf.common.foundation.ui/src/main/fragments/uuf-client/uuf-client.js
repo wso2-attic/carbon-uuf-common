@@ -20,3 +20,7 @@
 function onGet(env) {
     sendToClient("contextPath", env.contextPath);
 }
+
+function onPost(env) {
+    sendToClient("contextPath", env.contextPath);
+}
