@@ -17,6 +17,10 @@
  * under the License.
  */
 
-function onRequest(env) {
+function onGet(env) {
+    sendToClient("contextPath", env.contextPath);
+}
+
+function onPost(env) {
     sendToClient("contextPath", env.contextPath);
 }
