@@ -129,16 +129,22 @@ var UUFClient = {};
     }
 
     /**
-     * Check the zoneName and mode variables for null or empty and check for the callback functions.
+     * Check the zoneName variable is null or empty.
      *
-     * @param {string} zoneName
-     * @param {string} mode
-     * @param {?Object} callbacks
+     * @param {?string} zoneName
      */
-    function validateParams(zoneName, mode, callbacks) {
+    function validateZoneName(zoneName) {
         if (!zoneName) {
             throw new UUFClientException("Zone name cannot be null or empty.");
         }
+    }
+
+    /**
+     * Check the mode variable is null or empty.
+     *
+     * @param {?string} mode
+     */
+    function validateMode(mode) {
         if (!mode) {
             throw new UUFClientException("Mode cannot be null or empty.");
         }
@@ -146,6 +152,15 @@ var UUFClient = {};
             throw new UUFClientException("Mode should be one of '" + MODE_APPEND + "," + MODE_PREPEND + ","
                                          + MODE_OVERWRITE + "'. Instead found '" + mode + "'.");
         }
+    }
+
+
+    /**
+     * Check the callback functions.
+     *
+     * @param {?Object} callbacks
+     */
+    function validateCallback(callbacks) {
         if (!callbacks[CALLBACK_ON_SUCCESS]) {
             throw new UUFClientException("Function '" + CALLBACK_ON_SUCCESS + "' not found in callbacks.");
         }
@@ -155,29 +170,16 @@ var UUFClient = {};
     }
 
     /**
-     * Renders the specified fragment and pushes to the given zone according to the given mode.
+     * Get the fragment the content from Ajax call and pushes to a given zone or callback.
      *
      * @param {string} fragmentFullyQualifiedName fully qualified name of the fragment
      * @param {?Object} templateFillingObject data for the template
-     * @param {string} zoneName name of the zone to push
+     * @param {string} zone name of the zone to push
      * @param {string} mode mode to use
      * @param {Function} callbacks callback function
+     *
      */
-    UUFClient.renderFragment = function (fragmentFullyQualifiedName, templateFillingObject, zoneName, mode, callbacks) {
-        if (!fragmentFullyQualifiedName) {
-            throw new UUFClientException("Fragment name cannot be null or empty.");
-        }
-        validateParams(zoneName, mode, callbacks);
-
-        // This check is not done on renderTemplate* functions because this check will be done in pushContent function.
-        if (!zonesMap) {
-            populateZonesMap();
-        }
-        var zone = zonesMap[zoneName];
-        if (!zone) {
-            throw new UUFClientException("Zone '" + zoneName + "' does not exists in current DOM.");
-        }
-
+    function renderFragmentImpl(fragmentFullyQualifiedName, templateFillingObject, zone, mode, callbacks) {
         var url = contextPath + "/fragments/" + fragmentFullyQualifiedName;
         $.ajax({
                    url: url,
@@ -186,7 +188,9 @@ var UUFClient = {};
                    data: JSON.stringify(templateFillingObject),
                    success: function (data, textStatus, jqXHR) {
                        try {
-                           pushContent(data, zone, mode);
+                           if (zone && mode) {
+                               pushContent(data, zone, mode);
+                           }
                            callbacks[CALLBACK_ON_SUCCESS](data);
                        } catch (e) {
                            callbacks[CALLBACK_ON_FAILURE]("Error occurred while pushing the content.", e);
@@ -198,34 +202,120 @@ var UUFClient = {};
                        callbacks[CALLBACK_ON_FAILURE](msg, errorThrown);
                    }
                });
-    };
+    }
 
     /**
-     * Renders the specified embedded Handlebars template and pushes to the given zone according to the given mode.
+     * Renders the specified fragment and pushes to the given zone according to the given mode or provide rendered
+     * HTML content to the success function of the given callback.
      *
-     * @param {string} templateId id of the handlebars template
+     * @param {string} fragmentFullyQualifiedName fully qualified name of the fragment
      * @param {?Object} templateFillingObject data for the template
-     * @param {string} zoneName name of the zone to push
+     * @param {string | Function} zoneNameOrCallbacks name of the zone to push or callback function
      * @param {string} mode mode to use
      * @param {Function} callbacks callback function
      */
-    UUFClient.renderTemplate = function (templateId, templateFillingObject, zoneName, mode, callbacks) {
+    UUFClient.renderFragment =
+        function (fragmentFullyQualifiedName, templateFillingObject, zoneNameOrCallbacks, mode, callbacks) {
+            if (!fragmentFullyQualifiedName) {
+                throw new UUFClientException("Fragment name cannot be null or empty.");
+            }
+
+            if (!mode && !callbacks) {
+                callbacks = zoneNameOrCallbacks;
+                validateCallback(callbacks);
+
+                renderFragmentImpl(fragmentFullyQualifiedName, templateFillingObject, null, null, callbacks);
+            } else {
+                var zoneName = zoneNameOrCallbacks;
+                validateZoneName(zoneName);
+                validateMode(mode);
+                validateCallback(callbacks);
+
+                // This check is not done on renderTemplate* functions because this check will be done in pushContent
+                // function.
+                if (!zonesMap) {
+                    populateZonesMap();
+                }
+                var zone = zonesMap[zoneName];
+                if (!zone) {
+                    throw new UUFClientException("Zone '" + zoneName + "' does not exists in current DOM.");
+                }
+                renderFragmentImpl(fragmentFullyQualifiedName, templateFillingObject, zone, mode, callbacks);
+            }
+        };
+
+    /**
+     * Renders the specified embedded Handlebars template and pushes to the given zone according to the given mode or
+     * provide rendered HTML content to the success function of the given callback.
+     *
+     * @param {string} templateId id of the handlebars template
+     * @param {?Object} templateFillingObject data for the template
+     * @param {string | Function} zoneNameOrCallbacks name of the zone to push
+     * @param {string} mode mode to use
+     * @param {Function} callbacks callback function
+     */
+    UUFClient.renderTemplate = function (templateId, templateFillingObject, zoneNameOrCallbacks, mode, callbacks) {
         if (!templateId) {
             throw new UUFClientException("Template name cannot be null or empty.");
         }
-        validateParams(zoneName, mode, callbacks);
 
-        var source = $("#" + templateId).html();
-        if (source) {
-            UUFClient.renderTemplateString(source, templateFillingObject, zoneName, mode, callbacks);
+        if (!mode && !callbacks) {
+            callbacks = zoneNameOrCallbacks;
+            validateCallback(callbacks);
+            var source = $("#" + templateId).html();
+            if (source) {
+                UUFClient.renderTemplateString(source, templateFillingObject, callbacks, null, null);
+            } else {
+                throw new UUFClientException("Template '" + templateId + "' not found");
+            }
+
         } else {
-            throw new UUFClientException("Template '" + templateId + "' not found");
+            var zoneName = zoneNameOrCallbacks;
+
+            validateZoneName(zoneName);
+            validateMode(mode);
+            validateCallback(callbacks);
+            var source = $("#" + templateId).html();
+            if (source) {
+                UUFClient.renderTemplateString(source, templateFillingObject, zoneName, mode, callbacks);
+            } else {
+                throw new UUFClientException("Template '" + templateId + "' not found");
+            }
         }
     };
 
     /**
      * Retrieves the Handlebars template from the specified URL and renders and pushes it to the given zone according
-     * to the given mode.
+     * to the given mode or provide rendered HTML content to the success function of the given callback.
+     *
+     * @param {string} templateUrl url of the template
+     * @param {?Object} templateFillingObject data for the template
+     * @param {string | Function} zoneNameOrCallbacks name of the zone to push
+     * @param {string} mode mode to use
+     * @param {Function} callbacks callback function
+     */
+    UUFClient.renderTemplateUrl = function (templateUrl, templateFillingObject, zoneNameOrCallbacks, mode, callbacks) {
+        if (!templateUrl) {
+            throw new UUFClientException("Template url cannot be null or empty.");
+        }
+
+        if (!mode && !callbacks) {
+            callbacks = zoneNameOrCallbacks;
+            validateCallback(callbacks);
+            renderTemplateUrlImpl(templateUrl, templateFillingObject, null, null, callbacks);
+        } else {
+            var zoneName = zoneNameOrCallbacks;
+            validateZoneName(zoneName);
+            validateMode(mode);
+            validateCallback(callbacks);
+
+            renderTemplateUrlImpl(templateUrl, templateFillingObject, zoneName, mode, callbacks);
+        }
+    };
+
+    /**
+     * Renders the Handlebars template from the specified URL and pushes to the given zone according to the given mode
+     * or provide rendered HTML content to the success function of the given callback.
      *
      * @param {string} templateUrl url of the template
      * @param {?Object} templateFillingObject data for the template
@@ -233,12 +323,7 @@ var UUFClient = {};
      * @param {string} mode mode to use
      * @param {Function} callbacks callback function
      */
-    UUFClient.renderTemplateUrl = function (templateUrl, templateFillingObject, zoneName, mode, callbacks) {
-        if (!templateUrl) {
-            throw new UUFClientException("Template url cannot be null or empty.");
-        }
-        validateParams(zoneName, mode, callbacks);
-
+    function renderTemplateUrlImpl(templateUrl, templateFillingObject, zoneName, mode, callbacks) {
         $.ajax({
                    url: templateUrl,
                    type: "GET",
@@ -249,7 +334,9 @@ var UUFClient = {};
                                "Response content type is incorrect. Found '" + jqXHR.getResponseHeader("content-type")
                                + "' instead of 'text/x-handlebars-template'.");
                        }
-                       UUFClient.renderTemplateString(data, templateFillingObject, zoneName, mode);
+                       if (!zoneName && !mode) {
+                           UUFClient.renderTemplateString(data, templateFillingObject, zoneName, mode);
+                       }
                        callbacks[CALLBACK_ON_SUCCESS](data);
                    },
                    error: function (jqXHR, textStatus, errorThrown) {
@@ -258,40 +345,68 @@ var UUFClient = {};
                            errorThrown);
                    }
                });
-    };
+    }
 
     /**
-     * Renders the Handlebars template and pushes to the given zone according to the given mode.
+     * Renders the Handlebars template and pushes to the given zone according to the given mode
+     * or provide rendered Handlebars template content to a given call back.
      *
      * @param {string} templateString Handlebars template
      * @param {?Object} templateFillingObject data for the template
-     * @param {string} zoneName name of the zone to push
+     * @param {string} zone name of the zone to push
      * @param {string} mode mode to use
      * @param {Function} callbacks callback function
      */
-    UUFClient.renderTemplateString = function (templateString, templateFillingObject, zoneName, mode, callbacks) {
-        if (!templateString) {
-            throw new UUFClientException("Template string cannot be null or empty.");
-        }
-        validateParams(zoneName, mode, callbacks);
-
-        if (!zonesMap) {
-            populateZonesMap();
-        }
-
-        var zone = zonesMap[zoneName];
-        if (!zone) {
-            throw new UUFClientException("Zone '" + zoneName + "' does not exists in current DOM.");
-        }
-
+    function renderTemplateStringImpl(templateString,templateFillingObject,zone, mode, callbacks ) {
         try {
             var template = Handlebars.compile(templateString);
             var html = template(templateFillingObject);
-            pushContent(html, zone, mode);
+            if (zone && mode) {
+                pushContent(html, zone, mode);
+            }
             callbacks[CALLBACK_ON_SUCCESS](html);
         } catch (e) {
             callbacks[CALLBACK_ON_FAILURE]("Error occurred while compiling the handlebar template.", e);
         }
-    };
+    }
+
+    /**
+     * Renders the Handlebars template and pushes to the given zone according to the given mode or
+     * provide rendered HTML content to the success function of the given callback.
+     *
+     * @param {string} templateString Handlebars template
+     * @param {?Object} templateFillingObject data for the template
+     * @param {string | Function} zoneNameOrCallbacks name of the zone to push
+     * @param {string} mode mode to use
+     * @param {Function} callbacks callback function
+     */
+    UUFClient.renderTemplateString =
+        function (templateString, templateFillingObject, zoneNameOrCallbacks, mode, callbacks) {
+            if (!templateString) {
+                throw new UUFClientException("Template string cannot be null or empty.");
+            }
+
+            if (!mode && !callbacks) {
+                callbacks = zoneNameOrCallbacks;
+                validateCallback(callbacks);
+
+                renderTemplateStringImpl(templateString, templateFillingObject, null, null,callbacks);
+            } else {
+                var zoneName = zoneNameOrCallbacks;
+                validateZoneName(zoneName);
+                validateMode(mode);
+                validateCallback(callbacks);
+
+                if (!zonesMap) {
+                    populateZonesMap();
+                }
+
+                var zone = zonesMap[zoneName];
+                if (!zone) {
+                    throw new UUFClientException("Zone '" + zoneName + "' does not exists in current DOM.");
+                }
+                renderTemplateStringImpl(templateString, templateFillingObject, zone, mode,callbacks);
+            }
+        };
 
 })(UUFClient);
