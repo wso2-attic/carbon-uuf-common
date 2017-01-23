@@ -1,8 +1,9 @@
 css:
- - theme-wso2_1.0.0/css/theme-wso2.min.css
- - font-wso2_1.0.2/css/font-wso2.min.css
+ - lib/theme-wso2_2.0.0/css/theme-wso2.css
+ - lib/font-wso2_1.2.0/css/font-wso2.css
 
-js:
- - jquery_2.2.3/jquery.min.js
- - theme-wso2_1.0.0/js/bootstrap.min.js
- - theme-wso2_1.0.0/js/theme-wso2.min.js
+headJs:
+ - lib/jquery_2.2.3/jquery.min.js
+ - lib/theme-wso2_2.0.0/js/bootstrap.js
+ - lib/theme-wso2_2.0.0/js/theme-wso2.js
+js: []
