@@ -1,6 +1,6 @@
 css:
  - lib/theme-wso2_2.0.0/css/theme-wso2.css
- - lib/font-wso2_1.0.2/css/font-wso2.css
+ - lib/font-wso2_1.2.0/css/font-wso2.css
 
 headJs:
  - lib/jquery_2.2.3/jquery.min.js
