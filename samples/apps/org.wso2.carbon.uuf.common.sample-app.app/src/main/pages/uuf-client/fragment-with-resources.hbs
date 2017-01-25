@@ -1,0 +1,63 @@
+{{layout "org.wso2.carbon.uuf.common.foundation.ui.main"}}
+{{title "Fragment Samples | " @config.appName}}
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
+
+{{#fillZone "content"}}
+    <h3>Pushing a fragment with CSS and JS resources</h3>
+    <hr />
+    <p>You can render a fragment and push it to a zone in a page using the <b>uuf-client</b> library.
+       JS and CSS will be added dynamically.</p>
+    <p>Syntax : <code>UUFClient.renderFragment(fragmentFullyQualifiedName, templateFillingObject, zoneName,
+                      mode, callbacks);</code></p>
+
+    <p>The <b>mode</b> can be one of the following.</p>
+    <ul>
+        <li>"PREPEND" - put the pushing content before the existing content</li>
+        <li>"APPEND" - put the pushing content after the existing content</li>
+        <li>"OVERWRITE" - replace the existing content with the pushing content</li>
+    </ul>
+
+    <p>Add <b>uuf-client</b> fragment to the page.</p>
+    <pre>\{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}</pre>
+
+    <p>You can use the <b>uuf-client</b> library in the client side JS file like below.</p>
+    <pre>UUFClient.renderFragment("org.wso2.carbon.uuf.common.sample-app.feature.click", {"msgClass":"test", "class":"test","msgBody":"sample"}, "content", "APPEND", callbacks);</pre>
+
+    <h4>Sample callback</h4>
+    <pre>var callbacks = {
+    onSuccess: function (data) {
+        // call init function of the javascript lib(ex: call initScript function of message.js)
+        initScript();
+    },
+    onFailure: function (message, e) {
+        // do something
+    }
+};</pre>
+
+    <h3 style="margin-top: 40px;">Demo</h3>
+    <hr />
+    <P>In here, <b>click</b> fragments will be pushed to the <b>sample-area</b> zone and each fragment related button
+       clicks are identified uniquely.</P>
+
+    <div class="col-lg-6">
+        <form>
+            <div class="col-lg-12">
+                <div class="col-lg-2">
+                    <button id="pushToZone" class="btn btn-primary" type="button">Push a Row</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-lg-12 add-margin-2x" id="message-landing-zone" style="background-color: #f5f5f5;" data-toggle="loading"
+         data-loading-style="overlay">
+        {{#defineZone "sample-area"}}
+            <div style="padding: 40px;">
+                <h3>This is the <b>sample-area</b> zone. Try pushing click fragments to this zone.</h3>
+            </div>
+        {{/defineZone}}
+    </div>
+
+{{/fillZone}}
+
+{{js "js/fragment-resource-rendering.js"}}

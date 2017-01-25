@@ -34,8 +34,13 @@ var UUFClient = {};
      * Zones in the current DOM.
      * @type {{string: {start: Object, end: Object}}}
      */
-
     var zonesMap;
+
+    /**
+     * Array of rendered fragment names.
+     * @type {Array} Array of fragment fully qualified names
+     */
+    var renderedFargments = [];
 
     // Check whether the JQuery is available.
     if (!window.jQuery) {
@@ -95,6 +100,35 @@ var UUFClient = {};
             }
             zonesMap[zone.name][zone.position] = node;
         });
+    }
+
+    /**
+     * Update the HTML page content with JS and CSS returned by the fragment.
+     *
+     * @param {Object} data JSON object with HTML,CSS and JS
+     * @param {string} fragmentFullyQualifiedName fully qualified name of the fragment
+     */
+    function updateResources(data, fragmentFullyQualifiedName) {
+        if (renderedFargments.indexOf(fragmentFullyQualifiedName) == -1) {
+            renderedFargments.push(fragmentFullyQualifiedName);
+            var $head = $('head');
+            var $body = $("body");
+
+            if (data.css) {
+                $head.append(data.css);
+            }
+            if (data.headJs) {
+                $.each($(data.headJs), function (i, scriptEle) {
+                    $.getScript(scriptEle.getAttribute('src'));
+                });
+            }
+            if (data.js) {
+                $body.append($(data.js));
+                $.each($(data.js), function (i, scriptEle) {
+                    $.getScript(scriptEle.getAttribute('src'));
+                });
+            }
+        }
     }
 
     /**
@@ -189,9 +223,10 @@ var UUFClient = {};
                    success: function (data, textStatus, jqXHR) {
                        try {
                            if (zone && mode) {
-                               pushContent(data, zone, mode);
+                               updateResources(data, fragmentFullyQualifiedName);
+                               pushContent(data.html, zone, mode);
                            }
-                           callbacks[CALLBACK_ON_SUCCESS](data);
+                           callbacks[CALLBACK_ON_SUCCESS](data.html);
                        } catch (e) {
                            callbacks[CALLBACK_ON_FAILURE]("Error occurred while pushing the content.", e);
                        }
@@ -357,7 +392,7 @@ var UUFClient = {};
      * @param {string} mode mode to use
      * @param {Function} callbacks callback function
      */
-    function renderTemplateStringImpl(templateString,templateFillingObject,zone, mode, callbacks ) {
+    function renderTemplateStringImpl(templateString, templateFillingObject, zone, mode, callbacks) {
         try {
             var template = Handlebars.compile(templateString);
             var html = template(templateFillingObject);
@@ -390,7 +425,7 @@ var UUFClient = {};
                 callbacks = zoneNameOrCallbacks;
                 validateCallback(callbacks);
 
-                renderTemplateStringImpl(templateString, templateFillingObject, null, null,callbacks);
+                renderTemplateStringImpl(templateString, templateFillingObject, null, null, callbacks);
             } else {
                 var zoneName = zoneNameOrCallbacks;
                 validateZoneName(zoneName);
@@ -405,7 +440,7 @@ var UUFClient = {};
                 if (!zone) {
                     throw new UUFClientException("Zone '" + zoneName + "' does not exists in current DOM.");
                 }
-                renderTemplateStringImpl(templateString, templateFillingObject, zone, mode,callbacks);
+                renderTemplateStringImpl(templateString, templateFillingObject, zone, mode, callbacks);
             }
         };
 
