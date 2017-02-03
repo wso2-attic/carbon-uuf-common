@@ -22,8 +22,8 @@ var UUFClient = {};
 (function (UUFClient) {
 
     var UUF_ZONE_COMMENT_PREFIX = "[UUF-ZONE]";
-    var HTML_HEAD_ELEMENT = "head";
-    var HTML_BODY_ELEMENT = "body";
+    var HTML_HEAD_ELEMENT = $('head');
+    var HTML_BODY_ELEMENT = $('body');
 
     var CALLBACK_ON_SUCCESS = "onSuccess";
     var CALLBACK_ON_FAILURE = "onFailure";
@@ -113,9 +113,6 @@ var UUFClient = {};
     function updateResources(data, fragmentFullyQualifiedName) {
         if (renderedFragments.indexOf(fragmentFullyQualifiedName) == -1) {
             renderedFragments.push(fragmentFullyQualifiedName);
-            HTML_HEAD_ELEMENT = $('head');
-            HTML_BODY_ELEMENT = $("body");
-
             if (data.css) {
                 HTML_HEAD_ELEMENT.append(data.css);
             }
