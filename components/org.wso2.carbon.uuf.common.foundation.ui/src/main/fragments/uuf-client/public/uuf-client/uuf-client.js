@@ -113,8 +113,8 @@ var UUFClient = {};
     function updateResources(data, fragmentFullyQualifiedName) {
         if (renderedFragments.indexOf(fragmentFullyQualifiedName) == -1) {
             renderedFragments.push(fragmentFullyQualifiedName);
-            var HTML_HEAD_ELEMENT = $('head');
-            var HTML_BODY_ELEMENT = $("body");
+            HTML_HEAD_ELEMENT = $('head');
+            HTML_BODY_ELEMENT = $("body");
 
             if (data.css) {
                 HTML_HEAD_ELEMENT.append(data.css);
