@@ -22,6 +22,8 @@ var UUFClient = {};
 (function (UUFClient) {
 
     var UUF_ZONE_COMMENT_PREFIX = "[UUF-ZONE]";
+    var HTML_HEAD_ELEMENT = "head";
+    var HTML_BODY_ELEMENT = "body";
 
     var CALLBACK_ON_SUCCESS = "onSuccess";
     var CALLBACK_ON_FAILURE = "onFailure";
@@ -38,9 +40,9 @@ var UUFClient = {};
 
     /**
      * Array of rendered fragment names.
-     * @type {Array} Array of fragment fully qualified names
+     * @type {string[]} Array of fragments fully qualified names
      */
-    var renderedFargments = [];
+    var renderedFragments = [];
 
     // Check whether the JQuery is available.
     if (!window.jQuery) {
@@ -109,13 +111,13 @@ var UUFClient = {};
      * @param {string} fragmentFullyQualifiedName fully qualified name of the fragment
      */
     function updateResources(data, fragmentFullyQualifiedName) {
-        if (renderedFargments.indexOf(fragmentFullyQualifiedName) == -1) {
-            renderedFargments.push(fragmentFullyQualifiedName);
-            var $head = $('head');
-            var $body = $("body");
+        if (renderedFragments.indexOf(fragmentFullyQualifiedName) == -1) {
+            renderedFragments.push(fragmentFullyQualifiedName);
+            var HTML_HEAD_ELEMENT = $('head');
+            var HTML_BODY_ELEMENT = $("body");
 
             if (data.css) {
-                $head.append(data.css);
+                HTML_HEAD_ELEMENT.append(data.css);
             }
             if (data.headJs) {
                 $.each($(data.headJs), function (i, scriptEle) {
@@ -123,7 +125,7 @@ var UUFClient = {};
                 });
             }
             if (data.js) {
-                $body.append($(data.js));
+                HTML_BODY_ELEMENT.append($(data.js));
                 $.each($(data.js), function (i, scriptEle) {
                     $.getScript(scriptEle.getAttribute('src'));
                 });
