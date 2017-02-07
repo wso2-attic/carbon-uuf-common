@@ -16,6 +16,8 @@ menus:
                 link: "/uuf-client/fragment"
               - text: "Pushing a template"
                 link: "/uuf-client/template"
+              - text: "Pushing a fragment with client side CSS and JS"
+                link: "/uuf-client/fragment-with-resources"
 
 errorPages:
   404: /foundation/error/404
