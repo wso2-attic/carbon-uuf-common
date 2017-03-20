@@ -122,7 +122,6 @@ var UUFClient = {};
                 });
             }
             if (data.js) {
-                HTML_BODY_ELEMENT.append($(data.js));
                 $.each($(data.js), function (i, scriptEle) {
                     $.getScript(scriptEle.getAttribute('src'));
                 });
@@ -222,8 +221,8 @@ var UUFClient = {};
                    success: function (data, textStatus, jqXHR) {
                        try {
                            if (zone && mode) {
-                               updateResources(data, fragmentFullyQualifiedName);
                                pushContent(data.html, zone, mode);
+                               updateResources(data, fragmentFullyQualifiedName);
                            }
                            callbacks[CALLBACK_ON_SUCCESS](data.html);
                        } catch (e) {
