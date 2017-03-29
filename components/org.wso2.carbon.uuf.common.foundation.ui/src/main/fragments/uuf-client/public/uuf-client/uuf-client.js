@@ -117,14 +117,10 @@ var UUFClient = {};
                 HTML_HEAD_ELEMENT.append(data.css);
             }
             if (data.headJs) {
-                $.each($(data.headJs), function (i, scriptEle) {
-                    $.getScript(scriptEle.getAttribute('src'));
-                });
+                HTML_BODY_ELEMENT.append(data.headJs);
             }
             if (data.js) {
-                $.each($(data.js), function (i, scriptEle) {
-                    $.getScript(scriptEle.getAttribute('src'));
-                });
+                HTML_BODY_ELEMENT.append(data.js);
             }
         }
     }
