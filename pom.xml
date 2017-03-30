@@ -126,7 +126,7 @@
     <properties>
         <org.wso2.carbon.uuf.common.version>1.0.0-SNAPSHOT</org.wso2.carbon.uuf.common.version>
         <!-- Maven Plugins -->
-        <carbon-uuf-maven-plugin.version>1.0.0-m10</carbon-uuf-maven-plugin.version>
+        <carbon-uuf-maven-plugin.version>1.0.0-m13</carbon-uuf-maven-plugin.version>
 
         <!-- Source and target Java version -->
         <wso2.maven.compiler.source>1.8</wso2.maven.compiler.source>
