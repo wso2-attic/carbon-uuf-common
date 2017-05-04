@@ -438,4 +438,9 @@ var UUFClient = {};
             }
         };
 
+    UUFClient.i18n = function (messageKey) {
+        // TODO: 5/4/17 implement i18n capability to UUFClient, until we just return the messageKey.
+        return messageKey;
+    };
+
 })(UUFClient);
