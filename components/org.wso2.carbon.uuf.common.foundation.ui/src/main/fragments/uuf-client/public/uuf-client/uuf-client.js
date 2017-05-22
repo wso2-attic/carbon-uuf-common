@@ -218,8 +218,8 @@ var UUFClient = {};
                        try {
                            if (zone && mode) {
                                pushContent(data.html, zone, mode);
-                               updateResources(data, fragmentFullyQualifiedName);
                            }
+                           updateResources(data, fragmentFullyQualifiedName);
                            callbacks[CALLBACK_ON_SUCCESS](data.html);
                        } catch (e) {
                            callbacks[CALLBACK_ON_FAILURE]("Error occurred while pushing the content.", e);
