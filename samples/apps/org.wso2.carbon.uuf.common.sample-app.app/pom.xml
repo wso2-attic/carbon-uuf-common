@@ -20,7 +20,7 @@
 
     <groupId>org.wso2.carbon.uuf.common</groupId>
     <artifactId>org.wso2.carbon.uuf.common.sample-app.feature</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-m8</version>
     <packaging>carbon-feature</packaging>
 
     <name>WSO2 UUF Common - Samples - App</name>
@@ -29,7 +29,7 @@
     <parent>
         <groupId>org.wso2.carbon.uuf.common</groupId>
         <artifactId>samples-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0-m8</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
